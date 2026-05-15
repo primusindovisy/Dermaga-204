@@ -1,0 +1,1437 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>GII → SPTP | TOS & Infrastruktur Dermaga 204 JICT2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://api.fontshare.com/v2/css?f[]=clash-display@600,700&f[]=satoshi@400,500,700&display=swap" rel="stylesheet">
+<style>
+/* ===== Viewport base (inlined per skill rules, adapted for horizontal) ===== */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;background:#05071a;color:#e6f7ff;font-family:'Satoshi',system-ui,sans-serif}
+:root{
+  --navy:#05071a;
+  --navy-2:#0a0e27;
+  --cyan:#00f0ff;
+  --cyan-soft:rgba(0,240,255,.55);
+  --magenta:#ff00d4;
+  --magenta-soft:rgba(255,0,212,.55);
+  --gold:#ffd166;
+  --text:#e6f7ff;
+  --text-dim:#9fb3c8;
+  --title-size:clamp(1.6rem,4.2vw,3.4rem);
+  --h2-size:clamp(1.1rem,2.6vw,1.9rem);
+  --h3-size:clamp(.95rem,1.7vw,1.3rem);
+  --body-size:clamp(.72rem,1.05vw,1.02rem);
+  --small-size:clamp(.6rem,.85vw,.85rem);
+  --slide-padding:clamp(1rem,3vw,3rem);
+  --content-gap:clamp(.4rem,1.4vw,1.4rem);
+}
+
+/* Horizontal scroll-snap container */
+.deck{
+  display:flex;
+  flex-direction:row;
+  width:100vw;
+  height:100vh;
+  height:100dvh;
+  overflow-x:auto;
+  overflow-y:hidden;
+  scroll-snap-type:x mandatory;
+  scroll-behavior:smooth;
+  scrollbar-width:none;
+}
+.deck::-webkit-scrollbar{display:none}
+
+.slide{
+  flex:0 0 100vw;
+  width:100vw;
+  height:100vh;
+  height:100dvh;
+  scroll-snap-align:start;
+  scroll-snap-stop:always;
+  overflow:hidden;
+  position:relative;
+  padding:var(--slide-padding);
+  display:flex;
+  flex-direction:column;
+  background:
+    radial-gradient(ellipse at 15% 10%,rgba(0,240,255,.10),transparent 50%),
+    radial-gradient(ellipse at 85% 90%,rgba(255,0,212,.10),transparent 55%),
+    linear-gradient(180deg,#05071a 0%,#0a0e27 100%);
+}
+.slide::before{
+  /* grid overlay */
+  content:"";
+  position:absolute;inset:0;
+  background-image:
+    linear-gradient(rgba(0,240,255,.06) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(0,240,255,.06) 1px,transparent 1px);
+  background-size:48px 48px;
+  pointer-events:none;
+  mask-image:radial-gradient(ellipse at center,#000 40%,transparent 80%);
+  -webkit-mask-image:radial-gradient(ellipse at center,#000 40%,transparent 80%);
+}
+
+/* ===== Typography ===== */
+h1,h2,h3,h4{font-family:'Clash Display','Satoshi',sans-serif;font-weight:700;line-height:1.1;letter-spacing:-.01em}
+h1.slide-title{font-size:var(--title-size);color:#fff;position:relative;display:inline-block}
+h2.slide-title{font-size:var(--h2-size);color:#fff;position:relative;display:inline-block}
+.slide-title .char{display:inline-block;opacity:0;transform:translateY(.6em);transition:opacity .55s cubic-bezier(.16,1,.3,1),transform .55s cubic-bezier(.16,1,.3,1)}
+.slide.is-active .slide-title .char{opacity:1;transform:translateY(0)}
+.slide-title::after{
+  content:"";
+  position:absolute;
+  left:0;bottom:-.18em;
+  height:3px;
+  width:100%;
+  background:linear-gradient(90deg,var(--cyan),var(--magenta));
+  border-radius:2px;
+  transform:scaleX(0);
+  transform-origin:left center;
+  transition:transform .9s cubic-bezier(.16,1,.3,1) .35s;
+  box-shadow:0 0 12px var(--cyan-soft),0 0 24px var(--magenta-soft);
+}
+.slide.is-active .slide-title::after{transform:scaleX(1)}
+.eyebrow{font-family:'Clash Display',sans-serif;font-size:var(--small-size);letter-spacing:.32em;text-transform:uppercase;color:var(--cyan);opacity:.85;margin-bottom:.4em}
+
+/* ===== Slide content layout ===== */
+.slide-body{flex:1;display:flex;flex-direction:column;gap:var(--content-gap);min-height:0;overflow:hidden;margin-top:clamp(.6rem,1.4vw,1.4rem);position:relative;z-index:1}
+.slide-header{position:relative;z-index:1}
+
+/* ===== Cards & neon edge ===== */
+.card{
+  position:relative;
+  border-radius:14px;
+  padding:clamp(.8rem,1.5vw,1.4rem);
+  color:var(--text);
+  overflow:hidden;
+  isolation:isolate;
+  backdrop-filter:blur(6px);
+}
+.card::before{
+  /* rotating neon ring — uses transform rotation (universal browser support) */
+  content:"";
+  position:absolute;
+  top:50%;left:50%;
+  width:200%;
+  aspect-ratio:1;
+  background:conic-gradient(from 0deg,
+    var(--cyan) 0deg,
+    transparent 80deg,
+    var(--magenta) 180deg,
+    transparent 280deg,
+    var(--cyan) 360deg);
+  transform:translate(-50%,-50%) rotate(0deg);
+  animation:spinNeon 12s linear infinite;
+  z-index:-2;
+  pointer-events:none;
+  filter:blur(.5px);
+}
+.card::after{
+  /* inner fill — masks center so only the ring shows on edges + adds pulsing glow */
+  content:"";
+  position:absolute;
+  inset:1.5px;
+  border-radius:12.5px;
+  background:linear-gradient(180deg,rgba(13,18,46,.94),rgba(7,10,30,.96));
+  z-index:-1;
+  pointer-events:none;
+  animation:pulseGlow 3.4s ease-in-out infinite alternate;
+}
+@keyframes spinNeon{to{transform:translate(-50%,-50%) rotate(360deg)}}
+@keyframes pulseGlow{
+  from{box-shadow:inset 0 0 16px rgba(255,0,212,.05),0 0 12px rgba(0,240,255,.15)}
+  to{box-shadow:inset 0 0 30px rgba(255,0,212,.14),0 0 28px rgba(0,240,255,.40)}
+}
+.card h3{color:#fff;font-size:var(--h3-size);margin-bottom:.4em}
+.card h3 .accent{color:var(--cyan)}
+.card p,.card li{font-size:var(--body-size);color:var(--text-dim);line-height:1.45}
+.card ul{list-style:none;padding:0;display:flex;flex-direction:column;gap:.32em}
+.card li{position:relative;padding-left:1.1em}
+.card li::before{content:"▸";color:var(--magenta);position:absolute;left:0;top:0;font-size:.9em;text-shadow:0 0 6px var(--magenta-soft)}
+
+/* Grids */
+.grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:clamp(.6rem,1.2vw,1.1rem);min-height:0;flex:1}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(.55rem,1.1vw,1rem);min-height:0;flex:1}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(.5rem,1vw,.9rem);min-height:0;flex:1}
+.grid-2-img{display:grid;grid-template-columns:1.1fr 1fr;gap:clamp(.8rem,1.6vw,1.5rem);min-height:0;flex:1}
+
+/* Image zoom wrapper */
+.img-zoom{
+  position:relative;overflow:hidden;border-radius:14px;
+  border:1px solid rgba(0,240,255,.25);
+  box-shadow:0 0 18px rgba(0,240,255,.18),0 0 36px rgba(255,0,212,.10);
+  background:#0a0e27;
+  --zoom:1;--tx:0px;--ty:0px;
+  min-height:0;min-width:0;
+}
+.img-zoom img{
+  display:block;width:100%;height:100%;max-height:none;
+  object-fit:contain;
+  transform-origin:center center;
+  transition:transform .8s cubic-bezier(.16,1,.3,1);
+}
+.img-zoom:not(.zoomed):hover img{transform:scale(1.18)}
+.img-zoom.zoomed img{
+  transform:translate(var(--tx),var(--ty)) scale(var(--zoom));
+  transition:transform .25s ease;
+  cursor:grab;
+}
+.img-zoom.zoomed.grabbing img{cursor:grabbing;transition:none}
+.img-zoom::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 65%,rgba(5,7,26,.55));pointer-events:none}
+.img-cap{position:absolute;bottom:.6em;left:.8em;font-size:var(--small-size);color:var(--cyan);text-shadow:0 0 8px var(--cyan-soft);z-index:3;letter-spacing:.05em}
+.img-zoom-ctrl{
+  position:absolute;top:8px;right:8px;z-index:5;
+  display:flex;gap:5px;
+  opacity:0;transition:opacity .25s;
+}
+.img-zoom:hover .img-zoom-ctrl,
+.img-zoom.zoomed .img-zoom-ctrl{opacity:1}
+.img-zoom-ctrl button{
+  width:30px;height:30px;
+  border:1px solid rgba(0,240,255,.55);
+  background:rgba(5,7,26,.85);
+  color:var(--cyan);
+  font-family:'Clash Display',sans-serif;
+  font-size:15px;font-weight:700;line-height:1;
+  cursor:pointer;border-radius:7px;
+  backdrop-filter:blur(6px);
+  display:grid;place-items:center;
+  transition:all .2s;
+  user-select:none;
+}
+.img-zoom-ctrl button:hover{
+  background:var(--cyan);color:#05071a;
+  box-shadow:0 0 14px var(--cyan-soft);
+  transform:scale(1.08);
+}
+.img-zoom-ctrl .lvl{
+  align-self:center;
+  font-family:'Consolas',monospace;
+  font-size:10px;color:var(--cyan);
+  letter-spacing:.1em;
+  padding:0 6px;
+  background:rgba(5,7,26,.85);
+  border:1px solid rgba(0,240,255,.35);
+  border-radius:6px;
+  height:30px;display:grid;place-items:center;
+  min-width:38px;
+}
+
+.img-fit{display:flex;align-items:center;justify-content:center;min-height:0;flex:1}
+.img-fit .img-zoom{max-width:min(86vw,1100px);max-height:62vh;aspect-ratio:auto;width:100%}
+.img-fit .img-zoom img{height:62vh;max-height:62vh}
+
+/* Stats */
+.stat-row{display:flex;gap:clamp(.6rem,1.4vw,1.4rem);flex-wrap:wrap}
+.stat{flex:1;min-width:0;text-align:center;padding:clamp(.6rem,1.2vw,1rem) clamp(.4rem,.8vw,.8rem);background:rgba(0,240,255,.05);border-radius:12px;border:1px solid rgba(0,240,255,.15)}
+.stat .num{font-family:'Clash Display',sans-serif;font-size:clamp(1.4rem,3.2vw,2.4rem);color:var(--cyan);text-shadow:0 0 12px var(--cyan-soft);font-weight:700;line-height:1}
+.stat .lbl{font-size:var(--small-size);color:var(--text-dim);margin-top:.3em;letter-spacing:.08em;text-transform:uppercase}
+
+/* Tables */
+.tbl{width:100%;border-collapse:separate;border-spacing:0;font-size:clamp(.65rem,1vw,.95rem);color:var(--text)}
+.tbl th,.tbl td{padding:clamp(.32rem,.7vw,.62rem) clamp(.45rem,.9vw,.85rem);text-align:left;border-bottom:1px solid rgba(0,240,255,.12)}
+.tbl thead th{background:linear-gradient(90deg,rgba(0,240,255,.18),rgba(255,0,212,.14));color:#fff;font-family:'Clash Display',sans-serif;letter-spacing:.04em;text-transform:uppercase;font-size:clamp(.6rem,.9vw,.8rem);border-bottom:2px solid var(--cyan-soft)}
+.tbl tbody tr:nth-child(even){background:rgba(0,240,255,.035)}
+.tbl tbody tr:hover{background:rgba(255,0,212,.08)}
+.tbl .ra{color:var(--magenta);font-weight:700;text-shadow:0 0 8px var(--magenta-soft);text-align:center}
+.tbl .ci{color:var(--cyan);text-align:center;opacity:.75}
+.tbl-wrap{flex:1;min-height:0;overflow:auto;border-radius:12px;border:1px solid rgba(0,240,255,.18);background:rgba(7,10,30,.65)}
+.tbl-wrap::-webkit-scrollbar{height:6px;width:6px}
+.tbl-wrap::-webkit-scrollbar-thumb{background:rgba(0,240,255,.4);border-radius:3px}
+
+/* Cover slide */
+.cover{
+  align-items:center;justify-content:center;
+  background:
+    radial-gradient(circle at 30% 30%,rgba(0,240,255,.18),transparent 50%),
+    radial-gradient(circle at 70% 70%,rgba(255,0,212,.18),transparent 55%),
+    linear-gradient(180deg,#05071a,#0a0e27);
+}
+.cover .brand{font-family:'Clash Display';font-size:clamp(1.6rem,4vw,3rem);color:#fff;letter-spacing:.04em}
+.cover .brand span{background:linear-gradient(90deg,var(--cyan),var(--magenta));-webkit-background-clip:text;background-clip:text;color:transparent}
+.cover h1{font-size:clamp(2rem,5.2vw,4.2rem);color:#fff;text-align:center;max-width:18ch;margin:.4em auto;line-height:1.05}
+.cover .tag{font-size:var(--h3-size);color:var(--text-dim);text-align:center;max-width:42ch;margin:0 auto}
+.cover .meta{margin-top:2em;display:flex;gap:1.5em;flex-wrap:wrap;justify-content:center;font-size:var(--small-size);color:var(--cyan);letter-spacing:.18em;text-transform:uppercase}
+.cover .meta span{padding:.4em .9em;border:1px solid rgba(0,240,255,.35);border-radius:99px;background:rgba(0,240,255,.05);box-shadow:0 0 14px rgba(0,240,255,.18)}
+.cover-glow{position:absolute;width:60vmax;height:60vmax;border-radius:50%;background:radial-gradient(circle,rgba(0,240,255,.12),transparent 60%);filter:blur(40px);animation:floatGlow 14s ease-in-out infinite alternate}
+.cover-glow.b{background:radial-gradient(circle,rgba(255,0,212,.12),transparent 60%);right:-15vmax;top:30vmax;animation-duration:18s;animation-delay:-3s}
+.cover-glow.a{left:-15vmax;top:-15vmax}
+@keyframes floatGlow{to{transform:translate(8vmax,4vmax) scale(1.1)}}
+
+/* Cover & closing logos */
+.cover-logos{
+  display:flex;align-items:center;justify-content:center;
+  gap:clamp(1.2rem,3vw,3.5rem);
+  margin-bottom:clamp(1rem,2vw,2rem);
+  position:relative;z-index:2;
+  animation:logoFadeIn 1.2s cubic-bezier(.16,1,.3,1) both;
+}
+.cover-logos.closing{margin-bottom:clamp(.8rem,1.5vw,1.4rem)}
+.logo-box{
+  display:grid;place-items:center;
+  height:clamp(60px,7.5vw,110px);
+  padding:clamp(.5rem,.9vw,.9rem) clamp(.8rem,1.4vw,1.4rem);
+  background:rgba(5,7,26,.55);
+  border:1px solid rgba(0,240,255,.35);
+  border-radius:14px;
+  box-shadow:0 0 18px rgba(0,240,255,.22),0 0 36px rgba(255,0,212,.10);
+  backdrop-filter:blur(8px);
+  transition:transform .35s cubic-bezier(.16,1,.3,1),box-shadow .35s ease;
+}
+.logo-box:hover{transform:translateY(-3px) scale(1.04);box-shadow:0 0 28px var(--cyan-soft),0 0 50px var(--magenta-soft)}
+.logo-box img{height:100%;width:auto;max-width:clamp(140px,18vw,260px);object-fit:contain;display:block;filter:drop-shadow(0 0 6px rgba(255,255,255,.15))}
+.logo-x{
+  font-family:'Clash Display',sans-serif;
+  font-size:clamp(1.4rem,2.8vw,2.4rem);
+  font-weight:700;
+  background:linear-gradient(135deg,var(--cyan),var(--magenta));
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  text-shadow:0 0 18px var(--cyan-soft);
+  animation:xPulse 2.6s ease-in-out infinite alternate;
+}
+@keyframes logoFadeIn{from{opacity:0;transform:translateY(-12px)}to{opacity:1;transform:none}}
+@keyframes xPulse{from{filter:drop-shadow(0 0 4px rgba(0,240,255,.4))}to{filter:drop-shadow(0 0 14px rgba(255,0,212,.7))}}
+
+/* Timeline (slide 24) */
+.timeline{display:flex;align-items:stretch;gap:clamp(.3rem,.8vw,.7rem);flex:1;min-height:0;position:relative;padding:1rem 0}
+.timeline::before{
+  content:"";position:absolute;left:4%;right:4%;top:50%;height:3px;
+  background:linear-gradient(90deg,var(--cyan),var(--magenta));
+  box-shadow:0 0 14px var(--cyan-soft),0 0 24px var(--magenta-soft);
+  border-radius:2px;transform:translateY(-50%);z-index:0;
+}
+.tl-step{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:.5em;position:relative;z-index:1}
+.tl-circle{
+  width:clamp(48px,5vw,72px);height:clamp(48px,5vw,72px);
+  border-radius:50%;display:grid;place-items:center;
+  font-family:'Clash Display';font-weight:700;font-size:clamp(.9rem,1.6vw,1.4rem);
+  color:#05071a;background:linear-gradient(135deg,var(--cyan),var(--magenta));
+  box-shadow:0 0 18px var(--cyan-soft),0 0 32px var(--magenta-soft);
+  position:relative;
+}
+.tl-circle::after{content:"";position:absolute;inset:-6px;border-radius:50%;border:1px solid var(--cyan-soft);animation:pulseRing 2.4s ease-out infinite}
+@keyframes pulseRing{0%{transform:scale(.9);opacity:.9}100%{transform:scale(1.6);opacity:0}}
+.tl-card{background:linear-gradient(180deg,rgba(13,18,46,.92),rgba(7,10,30,.92));border:1px solid rgba(0,240,255,.22);border-radius:12px;padding:clamp(.5rem,.9vw,.8rem);text-align:center;width:100%;min-height:0;overflow:hidden}
+.tl-card h4{color:var(--cyan);font-size:clamp(.7rem,1.1vw,.95rem);margin-bottom:.3em;letter-spacing:.04em}
+.tl-card ul{list-style:none;font-size:clamp(.58rem,.85vw,.78rem);color:var(--text-dim);text-align:left;line-height:1.35}
+.tl-card li{padding-left:.7em;position:relative;margin-bottom:.15em}
+.tl-card li::before{content:"·";color:var(--magenta);position:absolute;left:0}
+.tl-step.go-live .tl-circle{background:linear-gradient(135deg,var(--gold),var(--magenta));box-shadow:0 0 24px var(--gold),0 0 40px var(--magenta-soft)}
+.tl-step.go-live .tl-card{border-color:var(--gold);box-shadow:0 0 18px rgba(255,209,102,.4)}
+
+/* Top bar: progress + counter */
+.topbar{position:fixed;top:0;left:0;right:0;height:3px;z-index:100;background:rgba(255,255,255,.04)}
+.topbar .fill{height:100%;background:linear-gradient(90deg,var(--cyan),var(--magenta));width:0;box-shadow:0 0 12px var(--cyan-soft);transition:width .4s ease}
+.counter{position:fixed;top:14px;right:20px;z-index:100;font-family:'Clash Display';font-size:clamp(.7rem,1vw,.9rem);color:var(--cyan);letter-spacing:.18em;text-shadow:0 0 10px var(--cyan-soft);background:rgba(5,7,26,.6);padding:.35em .8em;border:1px solid rgba(0,240,255,.25);border-radius:99px;backdrop-filter:blur(8px)}
+.counter .total{color:var(--text-dim);margin-left:.25em}
+.brand-tag{position:fixed;top:14px;left:20px;z-index:100;font-family:'Clash Display';font-size:clamp(.65rem,.9vw,.8rem);color:#fff;letter-spacing:.22em;text-transform:uppercase;background:rgba(5,7,26,.6);padding:.35em .9em;border:1px solid rgba(255,0,212,.3);border-radius:99px;backdrop-filter:blur(8px)}
+.brand-tag span{color:var(--magenta);text-shadow:0 0 10px var(--magenta-soft)}
+
+/* Nav arrows */
+.nav-arrow{position:fixed;top:50%;transform:translateY(-50%);z-index:99;width:44px;height:44px;display:grid;place-items:center;background:rgba(5,7,26,.6);border:1px solid rgba(0,240,255,.3);border-radius:50%;color:var(--cyan);font-size:1.4rem;cursor:pointer;backdrop-filter:blur(8px);transition:all .25s;user-select:none}
+.nav-arrow:hover{background:rgba(0,240,255,.18);box-shadow:0 0 18px var(--cyan-soft);transform:translateY(-50%) scale(1.08)}
+.nav-arrow.prev{left:18px}
+.nav-arrow.next{right:18px}
+.nav-arrow:disabled,.nav-arrow.disabled{opacity:.3;pointer-events:none}
+
+.hint{position:fixed;bottom:14px;left:50%;transform:translateX(-50%);z-index:99;font-size:var(--small-size);color:var(--text-dim);letter-spacing:.15em;text-transform:uppercase;opacity:.6;display:flex;gap:1em;align-items:center}
+.hint kbd{display:inline-block;padding:.18em .5em;border:1px solid rgba(0,240,255,.35);border-radius:4px;color:var(--cyan);font-family:'Clash Display';font-size:.85em}
+
+/* Tags / badges */
+.badge{display:inline-block;padding:.25em .7em;border-radius:99px;font-size:var(--small-size);letter-spacing:.1em;text-transform:uppercase;background:rgba(0,240,255,.12);border:1px solid rgba(0,240,255,.35);color:var(--cyan);margin-right:.4em}
+.badge.optional{background:rgba(255,209,102,.1);border-color:rgba(255,209,102,.4);color:var(--gold)}
+.badge.phase1{background:rgba(255,0,212,.12);border-color:rgba(255,0,212,.4);color:var(--magenta)}
+
+/* RACI legend */
+.raci-legend{display:flex;gap:1em;flex-wrap:wrap;margin-bottom:.6em;font-size:var(--small-size);color:var(--text-dim)}
+.raci-legend b{color:var(--cyan)}
+
+/* Flow */
+.flow{display:flex;align-items:center;gap:.4em;flex-wrap:wrap;justify-content:center;padding:.6em;background:rgba(0,240,255,.05);border:1px solid rgba(0,240,255,.18);border-radius:10px;font-size:var(--small-size)}
+.flow .step{padding:.3em .7em;background:rgba(7,10,30,.8);border:1px solid rgba(0,240,255,.3);border-radius:6px;color:#fff;white-space:nowrap}
+.flow .arr{color:var(--magenta);font-weight:700}
+
+/* Phase fades */
+.fade-up{opacity:0;transform:translateY(20px);transition:opacity .8s cubic-bezier(.16,1,.3,1) .5s,transform .8s cubic-bezier(.16,1,.3,1) .5s}
+.slide.is-active .fade-up{opacity:1;transform:none}
+.fade-up.d2{transition-delay:.7s}
+.fade-up.d3{transition-delay:.9s}
+.fade-up.d4{transition-delay:1.1s}
+
+/* Reduced motion — keep ambient neon decorative animations, only reduce scroll/hover effects */
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  .img-zoom:hover img{transform:none}
+  .slide-title .char{transition-duration:.2s!important}
+}
+/* Explicit duration enforcement on ambient ring/glow (defeats any inherited reduced-motion override) */
+.card::before{animation-duration:12s!important}
+.card::after{animation-duration:3.4s!important}
+@media (max-width:700px){
+  .grid-2,.grid-2-img,.grid-3,.grid-4{grid-template-columns:1fr}
+  .timeline{flex-direction:column;gap:.5em}
+  .timeline::before{display:none}
+  .nav-arrow{display:none}
+}
+</style>
+</head>
+<body>
+<div class="topbar"><div class="fill" id="progFill"></div></div>
+<div class="brand-tag">PT <span>GII</span> → PT SPTP</div>
+<div class="counter"><span id="curIdx">01</span><span class="total" id="totIdx">/30</span></div>
+<button class="nav-arrow prev" id="prevBtn" aria-label="Previous">‹</button>
+<button class="nav-arrow next" id="nextBtn" aria-label="Next">›</button>
+<div class="hint"><kbd>←</kbd><kbd>→</kbd> swipe untuk navigasi · hover gambar untuk zoom</div>
+
+<div class="deck" id="deck">
+
+<!-- ============== SLIDE 0 — COVER ============== -->
+<section class="slide cover" data-title="Cover">
+  <div class="cover-glow a"></div>
+  <div class="cover-glow b"></div>
+  <div class="cover-logos">
+    <div class="logo-box"><img src="assets/logo-gii.svg" alt="PT Global Intelegensi Indonesia"></div>
+    <div class="logo-x">×</div>
+    <div class="logo-box"><img src="assets/logo-sptp.svg" alt="PT SPTP"></div>
+  </div>
+  <div class="eyebrow" style="text-align:center;display:block">PT Global Intelegensi Indonesia</div>
+  <div class="brand"><span>GII</span> &nbsp;×&nbsp; PT SPTP</div>
+  <h1>TOS &amp; Infrastruktur IT<br>Dermaga 204 — JICT 2</h1>
+  <div class="tag">Solusi terintegrasi MY-TOS Cloud, jaringan industrial-grade, autogate, CCTV, dan mobilitas operasional untuk percepatan Go-Live <b style="color:var(--cyan)">1 Agustus 2026</b>.</div>
+  <div class="meta"><span>Complete Solution</span><span>Percepatan Tahap-1</span><span>RACI · Timeline · BOM</span></div>
+</section>
+
+<!-- ============== SLIDE 1 — EXECUTIVE SUMMARY ============== -->
+<section class="slide" data-title="Executive Summary">
+  <div class="slide-header">
+    <div class="eyebrow">Slide 01 · Executive Summary</div>
+    <h1 class="slide-title">Roadmap Kapasitas Dermaga 204</h1>
+  </div>
+  <div class="slide-body">
+    <div class="grid-2-img">
+      <div class="img-zoom fade-up"><img src="assets/Overview.jpeg" alt="Overview"><div class="img-cap">Overview Dermaga 204 — JICT 2</div></div>
+      <div style="display:flex;flex-direction:column;gap:var(--content-gap);min-height:0">
+        <div class="stat-row fade-up d2">
+          <div class="stat"><div class="num">110k</div><div class="lbl">Fase 1 · TEUs</div></div>
+          <div class="stat"><div class="num">215k</div><div class="lbl">Fase 2 · TEUs</div></div>
+          <div class="stat"><div class="num">317k</div><div class="lbl">Pre-Ultimate</div></div>
+          <div class="stat"><div class="num">400k</div><div class="lbl">Ultimate</div></div>
+        </div>
+        <div class="card fade-up d3">
+          <h3>Posisi <span class="accent">GII</span></h3>
+          <p>Penyedia solusi terintegrasi <b style="color:var(--cyan)">MY-TOS CLOUD</b> + IT infrastructure end-to-end. Mendukung kesiapan dermaga dari kondisi greenfield (tanpa fiber/power IT) menuju operasional komersial dengan high-availability design dan industrial-grade field devices.</p>
+        </div>
+        <div class="card fade-up d4">
+          <h3>Lingkup Solusi</h3>
+          <ul>
+            <li>Cloud TOS dual-AZ (AWS) + RDS, ElasticCache</li>
+            <li>Backbone fiber 48-core ring, dual ISP HA</li>
+            <li>Autogate 6 lanes, CCTV 48 cam, Wi-Fi 6E</li>
+            <li>VMT/HHT 43 unit, UPS Schneider, Video Wall</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== SLIDE 2 — HASIL SURVEY ============== -->
+<section class="slide" data-title="Hasil Survey">
+  <div class="slide-header">
+    <div class="eyebrow">Slide 02 · Site Survey</div>
+    <h1 class="slide-title">Hasil Survey Lapangan</h1>
+  </div>
+  <div class="slide-body">
+    <div class="grid-2-img">
+      <div class="img-zoom fade-up"><img src="assets/Yard-Infras.jpeg" alt="Yard"><div class="img-cap">Kondisi Container Yard</div></div>
+      <div style="display:flex;flex-direction:column;gap:var(--content-gap)">
+        <div class="card fade-up d2">
+          <h3>🟦 Lapangan Penumpukan</h3>
+          <ul>
+            <li>Belum tersedia fiber optic & power IT di yard</li>
+            <li>High mast tower eksisting <b style="color:var(--magenta)">belum ada yang terpasang</b> (tidak tersedia)</li>
+            <li>Perimeter yard dekat dermaga tanpa infrastruktur</li>
+          </ul>
+        </div>
+        <div class="card fade-up d3">
+          <h3>🟨 Office Dermaga</h3>
+          <ul>
+            <li>Belum ada infrastruktur IT di office terminal</li>
+            <li>Jalur cable tray tersedia untuk instalasi jaringan</li>
+            <li>Membutuhkan integrasi distribusi power → IT devices</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== SLIDE 3 — FUTURE PLAN ============== -->
+<section class="slide" data-title="Future Plan">
+  <div class="slide-header">
+    <div class="eyebrow">Slide 03 · Engineering Design</div>
+    <h1 class="slide-title">Future Plan Dermaga 204</h1>
+  </div>
+  <div class="slide-body">
+    <div class="card fade-up" style="flex:1;display:flex;flex-direction:column;justify-content:center">
+      <p style="font-size:var(--h3-size);color:var(--text);margin-bottom:1em">Survey komprehensif berbasis <b style="color:var(--cyan)">engineering drawing</b> dan spesifikasi desain — memastikan integrasi distribusi sumber listrik ke perangkat IT di seluruh area yard, gate, dan office terminal.</p>
+      <div class="grid-3">
+        <div class="card"><h3>⚡ Distribusi Power</h3><p>Sumber listrik utama terintegrasi dengan distribusi IT device di yard, tower, gate, dan server room.</p></div>
+        <div class="card"><h3>🌐 Jalur Fiber</h3><p>Routing fiber optic mengikuti perimeter container yard dan koneksi inter-building ODC.</p></div>
+        <div class="card"><h3>🏗️ Tower Eksisting</h3><p>Memanfaatkan high mast tower dari divisi facility terminal container untuk mounting AP, CCTV, dan SIP horn outdoor.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== SLIDE 4 — DESAIN ARSITEKTUR ============== -->
+<section class="slide" data-title="Desain Arsitektur">
+  <div class="slide-header">
+    <div class="eyebrow">Slide 04 · Architecture</div>
+    <h1 class="slide-title">7 Prinsip Desain Arsitektur</h1>
+  </div>
+  <div class="slide-body">
+    <div class="grid-4" style="grid-template-columns:repeat(4,1fr);grid-template-rows:repeat(2,1fr)">
+      <div class="card fade-up"><h3>🛡️ High Availability</h3><p>Dual ISP, active-standby cloud TOS, redundant distribution switch, UPS per node.</p></div>
+      <div class="card fade-up"><h3>🔒 Security Segmentation</h3><p>VLAN terpisah per domain: OT, CCTV, wireless, autogate, PA, management, server.</p></div>
+      <div class="card fade-up d2"><h3>🏭 Industrial Grade</h3><p>Field devices rating <b style="color:var(--cyan)">IP65/IP67</b> untuk kondisi outdoor terminal.</p></div>
+      <div class="card fade-up d2"><h3>🔆 Fiber Backbone</h3><p>Single Mode 48-core sebagai medium transmisi utama antar node.</p></div>
+      <div class="card fade-up d3"><h3>📡 Mobile Connectivity</h3><p>4G/5G primer, Wi-Fi 6E sekunder untuk coverage area operasional.</p></div>
+      <div class="card fade-up d3"><h3>📊 Centralized Monitoring</h3><p>Server monitoring untuk network, CCTV, autogate, operasional.</p></div>
+      <div class="card fade-up d4"><h3>📈 Scalability</h3><p>Mendukung ekspansi Phase II & III tanpa rekonfigurasi besar.</p></div>
+      <div class="card fade-up d4"><h3>♻️ Future-proof</h3><p>Open standards, Autogate, IoT, weighing bridge, AWS cloud-native.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== SLIDE 4.1 — HIGH-LEVEL TOPOLOGY ============== -->
+<section class="slide" data-title="Network Topology">
+  <div class="slide-header">
+    <div class="eyebrow">Slide 04 · Topology Diagram</div>
+    <h1 class="slide-title">High-Level Network Topology</h1>
+  </div>
+  <div class="slide-body img-fit">
+    <div class="img-zoom fade-up"><img src="assets/Detailed-Network Topo.jpeg" alt="Network Topology"><div class="img-cap">Network Topology — Dermaga 204 / JICT2</div></div>
+  </div>
+</section>
+
+<!-- ============== SLIDE 5 — FIBER OPTIK ============== -->
+<section class="slide" data-title="Fiber Optik">
+  <div class="slide-header">
+    <div class="eyebrow">Slide 05 · Fiber Optic Backbone</div>
+    <h1 class="slide-title">Infrastruktur Fiber Optik</h1>
+  </div>
+  <div class="slide-body">
+    <div class="grid-2-img">
+      <div class="img-zoom fade-up"><img src="assets/Layout-Fiber.png" alt="Fiber Layout"><div class="img-cap">Layout Fiber Optik — Ring Topology</div></div>
+      <div style="display:flex;flex-direction:column;gap:var(--content-gap)">
+        <div class="stat-row fade-up d2">
+          <div class="stat"><div class="num">3,950m</div><div class="lbl">Single Mode</div></div>
+          <div class="stat"><div class="num">48</div><div class="lbl">Core Backbone</div></div>
+          <div class="stat"><div class="num">25%</div><div class="lbl">Spare Ratio</div></div>
+        </div>
+        <div class="card fade-up d3">
+          <h3>Topologi & Termination</h3>
+          <ul>
+            <li>Ring topology mengikuti perimeter yard (3 fase)</li>
+            <li>9 titik termination di yard + 4 di office + 2 di T-3</li>
+            <li>Logical star dari ODC Office, fisik ring untuk failover</li>
+          </ul>
+        </div>
+        <div class="card fade-up d4">
+          <h3>Alokasi Core per Tower</h3>
+          <ul>
+            <li>2 core working (uplink primary) + 2 core spare</li>
+            <li>Total aktif: 36 core (9×4) + 12 core spare</li>
+            <li>ODC T-3 ↔ ODC Office: 4 ribbon (48 core) backbone trunk</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== SLIDE 6 — NETWORK SWITCH ============== -->
+<section class="slide" data-title="Network Switch">
+  <div class="slide-header">
+    <div class="eyebrow">Slide 06 · Switch Infrastructure</div>
+    <h1 class="slide-title">Infrastruktur Jaringan Switch</h1>
+  </div>
+  <div class="slide-body">
+    <div class="grid-2-img">
+      <div class="img-zoom fade-up"><img src="assets/Layout-Switches.png" alt="Switch Layout"><div class="img-cap">Layout Network Switch</div></div>
+      <div style="display:flex;flex-direction:column;gap:var(--content-gap)">
+        <div class="card fade-up d2">
+          <h3>Dual ISP & Failover</h3>
+          <p>Automatic failover via policy routing — <b style="color:var(--cyan)">ISP-1 primary</b>, ISP-2 secondary. <b style="color:var(--magenta)">RTO &lt; 60 detik</b> dengan dynamic routing.</p>
+        </div>
+        <div class="card fade-up d3">
+          <h3>High Availability Stack</h3>
+          <ul>
+            <li>Firewall dengan internal HA (cluster HA optional enhancement)</li>
+            <li>Distribution switch dual uplink ke firewall via LAG</li>
+            <li>UPS backup untuk semua server room, gate, tower, PNC</li>
+          </ul>
+        </div>
+        <div class="card fade-up d4">
+          <h3>Kabel Distribusi</h3>
+          <ul>
+            <li>Extension dari Terminal-3 → Office Dermaga</li>
+            <li>Office → Gate: STP outdoor cable</li>
+            <li>Office → Yard: industrial switch via fiber ring</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== SLIDE 7 — WIRELESS ============== -->
+<section class="slide" data-title="Wireless">
+  <div class="slide-header">
+    <div class="eyebrow">Slide 07 · Wi-Fi 6E Infrastructure</div>
+    <h1 class="slide-title">Wireless Infrastructure</h1>
+  </div>
+  <div class="slide-body">
+    <div class="grid-2-img">
+      <div style="display:flex;flex-direction:column;gap:var(--content-gap);min-height:0;min-width:0;overflow:hidden">
+        <div class="img-zoom fade-up" style="flex:1 1 0;min-height:0"><img src="assets/Layout-AP.png" alt="AP Layout"><div class="img-cap">AP Placement Strategy</div></div>
+        <div class="img-zoom fade-up d2" style="flex:1 1 0;min-height:0"><img src="assets/Wireless-AP.jpeg" alt="Access Point"><div class="img-cap">Access Point Outdoor</div></div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:var(--content-gap)">
+        <div class="card fade-up d2">
+          <h3>Centralized Controller</h3>
+          <div class="flow"><span class="step">VMT/HHT</span><span class="arr">→</span><span class="step">Wi-Fi 6E</span><span class="arr">→</span><span class="step">SW Tower</span><span class="arr">→</span><span class="step">Fiber</span><span class="arr">→</span><span class="step">SW-Dist</span><span class="arr">→</span><span class="step">FW</span><span class="arr">→</span><span class="step">MY-TOS Cloud</span></div>
+        </div>
+        <div class="card fade-up d3">
+          <h3>Coverage & Tower Strategy</h3>
+          <ul>
+            <li>Radius 100–200m per AP, mount tinggi 25–30m, throughput ≥100 Mbps</li>
+            <li>Tower-1, 9: north CY Phase I + berth north</li>
+            <li>Tower-7: east berth (QC apron); Tower-6: Phase II mid-yard</li>
+            <li>Tower-4, 5: Phase III yard + gate approach (overlap untuk roaming)</li>
+          </ul>
+        </div>
+        <div class="card fade-up d4">
+          <h3>Management</h3>
+          <p>Wireless Logic Controller (Server Room, VLAN MGMT) — config, monitoring, firmware, RRM untuk seluruh AP.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== SLIDE 8 — VMT & HHT ============== -->
+<section class="slide" data-title="VMT & HHT">
+  <div class="slide-header">
+    <div class="eyebrow">Slide 08 · Mobile Devices</div>
+    <h1 class="slide-title">VMT &amp; HHT — Mobile Operations</h1>
+  </div>
+  <div class="slide-body">
+    <div class="grid-2-img">
+      <div class="img-zoom fade-up"><img src="assets/VMT-HHT.jpeg" alt="VMT HHT"><div class="img-cap">Darveen VT-779W &amp; HHT RTC</div></div>
+      <div style="display:flex;flex-direction:column;gap:var(--content-gap)">
+        <div class="stat-row fade-up d2">
+          <div class="stat"><div class="num">33</div><div class="lbl">VMT Darveen</div></div>
+          <div class="stat"><div class="num">10</div><div class="lbl">HHT Darveen</div></div>
+        </div>
+        <div class="card fade-up d3">
+          <h3>Distribusi per CHE Type</h3>
+          <div class="tbl-wrap" style="max-height:30vh">
+            <table class="tbl">
+              <thead><tr><th>Jenis CHE</th><th>Qty VMT</th><th>Karakteristik</th></tr></thead>
+              <tbody>
+                <tr><td>RTG (Rubber Tyred Gantry)</td><td>10</td><td>Mobile in stack yard, Wi-Fi T-1/4/5/6</td></tr>
+                <tr><td>Reach Stacker (RS)</td><td>3</td><td>Yard reefer / special area</td></tr>
+                <tr><td>Internal Truck (Haulage)</td><td>20</td><td>Active mobile, 4G/5G primer</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="card fade-up d4">
+          <h3>Dual-Mode Failover</h3>
+          <p>Wi-Fi 6E saat sinyal kuat (RSSI ≥ −70 dBm), <b style="color:var(--magenta)">auto fallback ke 4G/5G IoT SIM</b> di luar coverage. Continuous TOS connectivity terjamin.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== SLIDE 9 — AUTOGATE SYSTEM ============== -->
+<section class="slide" data-title="Autogate System">
+  <div class="slide-header">
+    <div class="eyebrow">Slide 09 · Autogate · 6 Lanes</div>
+    <h1 class="slide-title">Autogate System — Per Lane Components</h1>
+  </div>
+  <div class="slide-body">
+    <div class="grid-2-img">
+      <div class="img-zoom fade-up"><img src="assets/gate_system.jpeg" alt="Gate System"><div class="img-cap">6-Lane Autogate Layout</div></div>
+      <div class="card fade-up d2" style="display:flex;flex-direction:column">
+        <h3>13 Komponen × 6 Lanes</h3>
+        <div class="grid-3" style="margin-top:.5em;font-size:var(--small-size)">
+          <ul style="font-size:inherit">
+            <li>Outdoor Kiosk Enclosure</li>
+            <li>Barrier Gate + Boom LED</li>
+            <li>Loop Detector</li>
+            <li>Beam Sensor (safety)</li>
+            <li>Industrial PC</li>
+          </ul>
+          <ul style="font-size:inherit">
+            <li>Monitor 10.4" Driver</li>
+            <li>QR Code Scanner</li>
+            <li>UHF RFID Reader (truck)</li>
+            <li>Mifare TCP/IP (driver)</li>
+            <li>Thermal Printer 80mm</li>
+          </ul>
+          <ul style="font-size:inherit">
+            <li>I/O Controller (relay)</li>
+            <li>SIP Intercom + Speaker</li>
+            <li>SIP Phone (PNC side)</li>
+            <li><span class="badge" style="margin-top:.4em">+1 SIP PBX (shared)</span></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== SLIDE 9.1 — GATE SCENARIOS ============== -->
+<section class="slide" data-title="Gate Scenarios">
+  <div class="slide-header">
+    <div class="eyebrow">Slide 09 · Operational Flow</div>
+    <h1 class="slide-title">Gate-In &amp; Gate-Out Scenarios</h1>
+  </div>
+  <div class="slide-body">
+    <div class="grid-2-img">
+      <div class="img-zoom fade-up"><img src="assets/Autogate.jpeg" alt="Autogate"><div class="img-cap">Autogate Kiosk &amp; Barrier</div></div>
+      <div style="display:flex;flex-direction:column;gap:var(--content-gap)">
+        <div class="card fade-up d2">
+          <h3>🟢 Gate-IN</h3>
+          <div class="flow" style="font-size:.7em">
+            <span class="step">Approach</span><span class="arr">→</span>
+            <span class="step">RFID Truck</span><span class="arr">→</span>
+            <span class="step">Mifare Driver</span><span class="arr">→</span>
+            <span class="step">Weighbridge</span><span class="arr">→</span>
+            <span class="step">TOS Validate</span><span class="arr">→</span>
+            <span class="step">Yard Slot</span><span class="arr">→</span>
+            <span class="step">Print Slip</span><span class="arr">→</span>
+            <span class="step">Barrier Open</span>
+          </div>
+        </div>
+        <div class="card fade-up d3">
+          <h3>🔴 Gate-OUT</h3>
+          <div class="flow" style="font-size:.7em">
+            <span class="step">Container ID Confirm</span><span class="arr">→</span>
+            <span class="step">Work Order Check</span><span class="arr">→</span>
+            <span class="step">TOS Validate</span><span class="arr">→</span>
+            <span class="step">Evidence Video</span><span class="arr">→</span>
+            <span class="step">Print Slip</span><span class="arr">→</span>
+            <span class="step">Barrier Open</span>
+          </div>
+        </div>
+        <div class="card fade-up d4"><h3>Evidence &amp; Audit</h3><p>Setiap transaksi terekam dengan timestamp video, integrasi ke Milestone XProtect untuk audit trail komprehensif.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== SLIDE 10 — CCTV CAMERAS ============== -->
+<section class="slide" data-title="CCTV Surveillance">
+  <div class="slide-header">
+    <div class="eyebrow">Slide 10 · CCTV Surveillance</div>
+    <h1 class="slide-title">CCTV — Hikvision 4K &amp; Milestone XProtect</h1>
+  </div>
+  <div class="slide-body">
+    <div class="grid-2-img">
+      <div class="img-zoom fade-up"><img src="assets/CCTV.jpeg" alt="CCTV"><div class="img-cap">Hikvision 8MP — H.265+ Smart Codec</div></div>
+      <div style="display:flex;flex-direction:column;gap:var(--content-gap)">
+        <div class="card fade-up d2"><h3>📷 Kamera Hikvision 8MP (4K)</h3><p>Image quality untuk identifikasi barcode &amp; plate, operator activity monitoring, kompatibel <b style="color:var(--cyan)">H.265+</b> (~50% reduction storage).</p></div>
+        <div class="card fade-up d3"><h3>🎥 Milestone XProtect Professional+</h3><ul><li>Unlimited camera per server, multi-server federation</li><li>Multi-screen Smart Client (video wall ready)</li><li>Mobile Client + open platform (LPR/ANPR ready)</li></ul></div>
+        <div class="card fade-up d4"><h3>💾 NVR Milestone Husky</h3><p>Purpose-built appliance — <b style="color:var(--magenta)">Husky M500A / M50A</b> untuk 48 kamera × 8MP × 30 hari retention.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== SLIDE 10.1 — CCTV Distribution ============== -->
+<section class="slide" data-title="CCTV Distribution">
+  <div class="slide-header">
+    <div class="eyebrow">Slide 10 · Camera Distribution</div>
+    <h1 class="slide-title">Distribusi PTZ &amp; Fixed Cameras</h1>
+  </div>
+  <div class="slide-body">
+    <div class="grid-2-img">
+      <div class="img-zoom fade-up"><img src="assets/Layout-CCTV.png" alt="CCTV Layout"><div class="img-cap">Layout 48 kamera — 9 towers + 6 gate lanes</div></div>
+      <div style="display:flex;flex-direction:column;gap:var(--content-gap);min-height:0">
+        <div class="stat-row fade-up d2">
+          <div class="stat"><div class="num">10</div><div class="lbl">PTZ Camera</div></div>
+          <div class="stat"><div class="num">20</div><div class="lbl">Fixed Yard</div></div>
+          <div class="stat"><div class="num">18</div><div class="lbl">Fixed Gate</div></div>
+        </div>
+        <div class="card fade-up d3" style="min-height:0;display:flex;flex-direction:column">
+          <h3>PTZ Strategic Placement (10 units)</h3>
+          <div class="tbl-wrap" style="max-height:28vh">
+            <table class="tbl">
+              <thead><tr><th>#</th><th>Lokasi</th><th>Fungsi</th></tr></thead>
+              <tbody>
+                <tr><td>1</td><td>Tower-1 / Yard Fase I North</td><td>Yard north &amp; berth north</td></tr>
+                <tr><td>2</td><td>Tower-5 / Fase III mid-south</td><td>Mid-south transit yard</td></tr>
+                <tr><td>3</td><td>Tower-6 / Fase II mid</td><td>Phase I & II interface</td></tr>
+                <tr><td>4</td><td>Tower-7 / Dermaga timur</td><td>QC apron operation</td></tr>
+                <tr><td>5</td><td>Tower-9 / Fase I NE</td><td>North berth end</td></tr>
+                <tr><td>6–7</td><td>Gate entrance &amp; exit</td><td>Truck overview</td></tr>
+                <tr><td>8</td><td>Berth mid-area</td><td>Backup mid QC</td></tr>
+                <tr><td>9</td><td>Terminal access road</td><td>Perimeter &amp; exit</td></tr>
+                <tr><td>10</td><td>Server room / indoor</td><td>Critical infra</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== SLIDE 11 — UPS ============== -->
+<section class="slide" data-title="UPS Schneider">
+  <div class="slide-header">
+    <div class="eyebrow">Slide 11 · Power Backup</div>
+    <h1 class="slide-title">UPS Schneider — Power Protection</h1>
+  </div>
+  <div class="slide-body">
+    <div class="grid-2-img">
+      <div class="img-zoom fade-up"><img src="assets/Schneider_UPS.jpeg" alt="Schneider UPS"><div class="img-cap">Schneider UPS Units</div></div>
+      <div style="display:flex;flex-direction:column;gap:var(--content-gap);min-height:0">
+        <div class="stat-row fade-up d2">
+          <div class="stat"><div class="num">10</div><div class="lbl">UPS 1 KVA</div></div>
+          <div class="stat"><div class="num">2</div><div class="lbl">UPS 3 KVA Rack</div></div>
+        </div>
+        <div class="card fade-up d3" style="min-height:0;display:flex;flex-direction:column">
+          <h3>Distribusi UPS per Lokasi</h3>
+          <div class="tbl-wrap" style="max-height:34vh">
+            <table class="tbl">
+              <thead><tr><th>Lokasi</th><th>Qty</th><th>Beban Utama</th></tr></thead>
+              <tbody>
+                <tr><td>Tower 1–9</td><td>9 × 1 KVA</td><td>Industrial SW + AP + CCTV + SIP Horn</td></tr>
+                <tr><td>PNC Room</td><td>1 × 1 KVA</td><td>Operator PC + monitor + SIP phone</td></tr>
+                <tr><td><b style="color:var(--cyan)">Gate Room</b></td><td>1 × 3 KVA</td><td>6-lane gate distribution</td></tr>
+                <tr><td><b style="color:var(--cyan)">Server Room</b></td><td>1 × 3 KVA</td><td>WAN Edge, FW/XDR, 3 Cisco Dist, NVR, Video Wall</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== SLIDE 12 — Video Display (Optional) ============== -->
+<section class="slide" data-title="Video Display">
+  <div class="slide-header">
+    <div class="eyebrow">Slide 12 · PNC Control Center <span class="badge optional">Optional</span></div>
+    <h1 class="slide-title">Sistem Video Display &amp; PNC Room</h1>
+  </div>
+  <div class="slide-body">
+    <div class="grid-2-img">
+      <div class="img-zoom fade-up"><img src="assets/Ruangan_PNC.jpeg" alt="PNC Room"><div class="img-cap">PNC Control Room Design</div></div>
+      <div style="display:flex;flex-direction:column;gap:var(--content-gap)">
+        <div class="card fade-up d2"><h3>🖥️ Video Wall 6 × 55"</h3><p>Ultra-narrow bezel (≤3.5mm), formasi semicircle dengan jarak optimal viewing 4–6m, dimmable LED untuk kontrol pantulan.</p></div>
+        <div class="card fade-up d3"><h3>🎛️ Video Wall Controller</h3><ul><li>≥8 source input (HDMI, DP, IP stream, RGB)</li><li>Layout: full screen, 2×3 grid, custom PiP</li><li>Web GUI · integrasi RTSP dari Milestone VMS</li></ul></div>
+        <div class="card fade-up d4"><h3>👥 Operator Consoles</h3><p>Dual 24–27" monitor per operator, supervisor triple monitor, SIP headset, ergonomic desk cable management.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== SLIDE 13 — Public Address ============== -->
+<section class="slide" data-title="Public Address">
+  <div class="slide-header">
+    <div class="eyebrow">Slide 13 · Public Address <span class="badge optional">Optional</span></div>
+    <h1 class="slide-title">Sistem Public Address — SIP-Based</h1>
+  </div>
+  <div class="slide-body">
+    <div class="grid-2-img">
+      <div style="display:flex;flex-direction:column;gap:var(--content-gap);min-height:0;min-width:0;overflow:hidden">
+        <div class="img-zoom fade-up" style="flex:1 1 0;min-height:0"><img src="assets/Layout-PA.png" alt="PA Layout"><div class="img-cap">Layout 9 SIP Horn — Tower 1–9</div></div>
+        <div class="img-zoom fade-up d2" style="flex:1 1 0;min-height:0"><img src="assets/Public-Address.jpeg" alt="PA System"><div class="img-cap">SIP Horn Outdoor 100W</div></div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:var(--content-gap)">
+        <div class="card fade-up d2"><h3>🔊 Arsitektur SIP</h3><p>Terintegrasi dengan Autogate SIP PBX existing — <b style="color:var(--cyan)">tidak perlu PBX terpisah</b>. 9 SIP Horn 100W di tower 1–9 + SIP Paging Station di PNC.</p></div>
+        <div class="card fade-up d3" style="min-height:0">
+          <h3>Zona Broadcast</h3>
+          <div class="tbl-wrap" style="max-height:30vh"><table class="tbl">
+            <thead><tr><th>Zona</th><th>Perangkat</th><th>Use Case</th></tr></thead>
+            <tbody>
+              <tr><td>YARD</td><td>9 SIP Horn 100W</td><td>RTG/RS/Truck instructions</td></tr>
+              <tr><td>GATE</td><td>6 outdoor speakers</td><td>Driver notifications</td></tr>
+              <tr><td>PNC</td><td>SIP phone</td><td>Internal communication</td></tr>
+              <tr><td><b style="color:var(--magenta)">ALL ZONE</b></td><td>15 horn + PNC</td><td>Emergency broadcast</td></tr>
+            </tbody>
+          </table></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== SLIDE 14 — GPS Fleet ============== -->
+<section class="slide" data-title="GPS Fleet">
+  <div class="slide-header">
+    <div class="eyebrow">Slide 14 · GPS Fleet Management <span class="badge optional">Optional</span></div>
+    <h1 class="slide-title">Cartrack Fleet Plus — 20 Trucks</h1>
+  </div>
+  <div class="slide-body">
+    <div class="grid-2-img">
+      <div class="img-zoom fade-up"><img src="assets/GPS_Tracker_for_truck.jpeg" alt="GPS Tracker"><div class="img-cap">GPS Tracker + Sensors per Truck</div></div>
+      <div style="display:flex;flex-direction:column;gap:var(--content-gap)">
+        <div class="card fade-up d2"><h3>⚙️ Hardware per Truck</h3><ul><li>GPS receiver ≤5m akurasi + 4G/LTE modem</li><li>Accelerometer (harsh braking/cornering)</li><li>Fuel level sensor + Temperature sensor</li><li>Backup battery + tamper detection</li></ul></div>
+        <div class="card fade-up d3"><h3>📍 Platform Features</h3><ul><li>Real-time map (30–60s refresh) + route playback</li><li>Geofencing alerts + driver behavior scoring</li><li>Speeding, idle time, fuel consumption tracking</li><li>Mobile app + daily/weekly/monthly reporting</li></ul></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== SLIDE 15 — BOM Part 1 ============== -->
+<section class="slide" data-title="Commercial · BOM 1">
+  <div class="slide-header">
+    <div class="eyebrow">Slide 15 · Commercial · BOM Part 1/3</div>
+    <h1 class="slide-title">Bill of Materials — Devices &amp; Wireless</h1>
+  </div>
+  <div class="slide-body">
+    <div class="card fade-up" style="flex:1;display:flex;flex-direction:column;min-height:0">
+      <div class="tbl-wrap" style="flex:1"><table class="tbl">
+        <thead><tr><th>Kategori</th><th>Item</th><th>Qty</th><th>Unit</th></tr></thead>
+        <tbody>
+          <tr><td rowspan="2"><b style="color:var(--cyan)">VMT &amp; HHT</b></td><td>VMT Darveen w/ bracket (IoT SIM)</td><td>33</td><td>Unit</td></tr>
+          <tr><td>HHT Darveen (IoT SIM)</td><td>10</td><td>Unit</td></tr>
+          <tr><td rowspan="3"><b style="color:var(--cyan)">CCTV</b></td><td>PTZ Camera CY w/ bracket</td><td>10</td><td>Unit</td></tr>
+          <tr><td>Fixed Camera CY w/ bracket</td><td>20</td><td>Unit</td></tr>
+          <tr><td>Fixed Camera Gate w/ bracket</td><td>18</td><td>Unit</td></tr>
+          <tr><td rowspan="2"><b style="color:var(--cyan)">Wireless</b></td><td>Access Point Outdoor w/ bracket &amp; PoE</td><td>6</td><td>Unit</td></tr>
+          <tr><td>Wireless Logic Controller</td><td>1</td><td>Unit</td></tr>
+          <tr><td rowspan="13"><b style="color:var(--cyan)">Autogate (6 lanes)</b></td><td>Barrier Gate + Boom LED</td><td>6</td><td>Unit</td></tr>
+          <tr><td>Kiosk / Enclosure</td><td>6</td><td>Unit</td></tr>
+          <tr><td>Beam Sensor</td><td>6</td><td>Unit</td></tr>
+          <tr><td>Loop Detector</td><td>6</td><td>Unit</td></tr>
+          <tr><td>Industrial PC</td><td>6</td><td>Unit</td></tr>
+          <tr><td>Monitor 10.4"</td><td>6</td><td>Unit</td></tr>
+          <tr><td>Intercom + IP Phone</td><td>6</td><td>Unit</td></tr>
+          <tr><td>SIP PBX Server</td><td>1</td><td>Unit</td></tr>
+          <tr><td>Speaker Intercom</td><td>6</td><td>Unit</td></tr>
+          <tr><td>QR Code Scanner</td><td>6</td><td>Unit</td></tr>
+          <tr><td>RFID Reader</td><td>6</td><td>Unit</td></tr>
+          <tr><td>Thermal Printer 80mm</td><td>6</td><td>Unit</td></tr>
+          <tr><td>I/O Controller</td><td>6</td><td>Unit</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== SLIDE 15.1 — BOM Part 2 ============== -->
+<section class="slide" data-title="BOM 2 · Network">
+  <div class="slide-header">
+    <div class="eyebrow">Slide 15 · Commercial · BOM Part 2/3</div>
+    <h1 class="slide-title">BOM — Network, Fiber &amp; Video Wall</h1>
+  </div>
+  <div class="slide-body">
+    <div class="card fade-up" style="flex:1;display:flex;flex-direction:column;min-height:0">
+      <div class="tbl-wrap" style="flex:1"><table class="tbl">
+        <thead><tr><th>Kategori</th><th>Item</th><th>Qty</th><th>Unit</th></tr></thead>
+        <tbody>
+          <tr><td rowspan="10"><b style="color:var(--cyan)">Network</b></td><td>Switch Cisco 24 Port SFP</td><td>1</td><td>Unit</td></tr>
+          <tr><td>Switch Cisco 24 Port</td><td>2</td><td>Unit</td></tr>
+          <tr><td>Industrial Switch 8 Port + SFP</td><td>16</td><td>Unit</td></tr>
+          <tr><td>UPS 3 KVA Rack</td><td>2</td><td>Unit</td></tr>
+          <tr><td>UPS 1 KVA</td><td>10</td><td>Unit</td></tr>
+          <tr><td>Rack Mount 20U</td><td>2</td><td>Unit</td></tr>
+          <tr><td>Patch Panel 24 Port</td><td>2</td><td>Unit</td></tr>
+          <tr><td>Cable Management</td><td>2</td><td>Unit</td></tr>
+          <tr><td>Modular</td><td>48</td><td>Pcs</td></tr>
+          <tr><td>Patch Cord RJ45 1m</td><td>48</td><td>Pcs</td></tr>
+          <tr><td rowspan="6"><b style="color:var(--cyan)">Fiber Optik</b></td><td>FO 48 Core Single Mode</td><td>3,950</td><td>Meter</td></tr>
+          <tr><td>HDPE Pipa 1 Inch</td><td>3,950</td><td>Meter</td></tr>
+          <tr><td>FDU Wall-mount 12 Core w/ pigtail</td><td>10</td><td>Unit</td></tr>
+          <tr><td>FDU Rack Mount 28 Core w/ pigtail</td><td>3</td><td>Unit</td></tr>
+          <tr><td>Patch Cord FO SC-LC 2m</td><td>30</td><td>Pcs</td></tr>
+          <tr><td>Panel Box 800×600 Polyester</td><td>16</td><td>Unit</td></tr>
+          <tr><td rowspan="7"><b style="color:var(--gold)">Video Wall <span class="badge optional">opt</span></b></td><td>Video Wall Display 55" UNB</td><td>6</td><td>Set</td></tr>
+          <tr><td>Video Wall Controller</td><td>1</td><td>Unit</td></tr>
+          <tr><td>Wall-mount Bracket Pull-Out</td><td>1</td><td>Unit</td></tr>
+          <tr><td>HDMI/DP Cable Set</td><td>1</td><td>Set</td></tr>
+          <tr><td>PC Workstation Operator</td><td>2</td><td>Unit</td></tr>
+          <tr><td>PC Workstation Supervisor</td><td>1</td><td>Unit</td></tr>
+          <tr><td>Monitor Operator 24–27"</td><td>3</td><td>Unit</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== SLIDE 15.2 — BOM Part 3 ============== -->
+<section class="slide" data-title="BOM 3 · PA & Install">
+  <div class="slide-header">
+    <div class="eyebrow">Slide 15 · Commercial · BOM Part 3/3</div>
+    <h1 class="slide-title">BOM — PA, GPS Fleet &amp; Installation</h1>
+  </div>
+  <div class="slide-body">
+    <div class="card fade-up" style="flex:1;display:flex;flex-direction:column;min-height:0">
+      <div class="tbl-wrap" style="flex:1"><table class="tbl">
+        <thead><tr><th>Kategori</th><th>Item</th><th>Qty</th><th>Unit</th></tr></thead>
+        <tbody>
+          <tr><td rowspan="4"><b style="color:var(--gold)">PA <span class="badge optional">opt</span></b></td><td>SIP Horn Outdoor 100W</td><td>9</td><td>Unit</td></tr>
+          <tr><td>SIP Paging Station</td><td>1</td><td>Unit</td></tr>
+          <tr><td>Mounting Bracket Tower</td><td>9</td><td>Unit</td></tr>
+          <tr><td>PoE+ Injector/Adapter</td><td>9</td><td>Unit</td></tr>
+          <tr><td rowspan="5"><b style="color:var(--gold)">GPS Fleet <span class="badge optional">opt</span></b></td><td>GPS Tracker 12V Wired</td><td>20</td><td>Unit</td></tr>
+          <tr><td>Fuel Level Sensor</td><td>20</td><td>Unit</td></tr>
+          <tr><td>Temperature Sensor</td><td>20</td><td>Unit</td></tr>
+          <tr><td>Cartrack Fleet Plus (1-Year Sub.)</td><td>20</td><td>Device-year</td></tr>
+          <tr><td>Wiring Harness + Mounting</td><td>20</td><td>Set</td></tr>
+          <tr><td rowspan="6"><b style="color:var(--cyan)">Install Material</b></td><td>STP Outdoor Cat 5e Cable</td><td>4</td><td>Roll</td></tr>
+          <tr><td>UTP Cat 6 Cable</td><td>4</td><td>Roll</td></tr>
+          <tr><td>RJ45 Connector Cat 5e (50 pack)</td><td>5</td><td>Pack</td></tr>
+          <tr><td>Flexible Clipsal</td><td>2</td><td>Roll</td></tr>
+          <tr><td>Pipa Clipsal + Sock</td><td>100</td><td>Batang</td></tr>
+          <tr><td>Support Material</td><td>1</td><td>LS</td></tr>
+          <tr><td rowspan="10"><b style="color:var(--magenta)">Installation Services</b></td><td>VMT Installation</td><td>33</td><td>Unit</td></tr>
+          <tr><td>CCTV Installation</td><td>48</td><td>Unit</td></tr>
+          <tr><td>Access Point Installation</td><td>6</td><td>Unit</td></tr>
+          <tr><td>Rackmount Installation</td><td>2</td><td>Unit</td></tr>
+          <tr><td>UPS Installation</td><td>12</td><td>Unit</td></tr>
+          <tr><td>Box Panel Installation</td><td>16</td><td>Unit</td></tr>
+          <tr><td>Cisco / Industrial Switch Install</td><td>3 + 16</td><td>Unit</td></tr>
+          <tr><td>Fiber Optic Laying &amp; HDPE Conduit</td><td>1</td><td>LS</td></tr>
+          <tr><td>Fiber Optic Splicing</td><td>455</td><td>Core</td></tr>
+          <tr><td>PA / Fleet / Display Installation</td><td>9 / 20 / 6</td><td>LS</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== SLIDE 16 — MY-TOS CLOUD ============== -->
+<section class="slide" data-title="MY-TOS Cloud">
+  <div class="slide-header">
+    <div class="eyebrow">Slide 16 · MY-TOS Cloud · AWS</div>
+    <h1 class="slide-title">MY-TOS CLOUD — Dual-AZ Architecture</h1>
+  </div>
+  <div class="slide-body">
+    <div class="grid-2-img">
+      <div class="img-zoom fade-up"><img src="assets/Cloud-TOS.jpeg" alt="Cloud TOS"><div class="img-cap">AWS Dual-AZ MY-TOS Deployment</div></div>
+      <div style="display:flex;flex-direction:column;gap:var(--content-gap)">
+        <div class="card fade-up d2"><h3>☁️ Two Availability Zones</h3><p>Primary di AZ-1 automatic failover ke Standby di AZ-2. <b style="color:var(--cyan)">Amazon RDS</b> Primary + Replica dengan sinkronisasi. <b style="color:var(--magenta)">ElasticCache for Redis</b> untuk akselerasi data hot-path.</p></div>
+        <div class="card fade-up d3"><h3>📦 TOS Modules</h3><ul><li>Yard Plan · Vessel Schedule</li><li>Autogate Integration</li><li>Multi-Connection Session &amp; Redundancy</li></ul></div>
+        <div class="card fade-up d4"><h3>🔌 Connectivity</h3><ul><li>Primary: <b style="color:var(--cyan)">Direct Connect</b> dedicated fiber</li><li>Backup: 4G/5G VPN (auto failover via gNB/CPE)</li><li>IoT data via AWS Transit Gateway</li></ul></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== SLIDE 17 — PERCEPATAN TAHAP-1 ============== -->
+<section class="slide" data-title="Percepatan Tahap-1">
+  <div class="slide-header">
+    <div class="eyebrow">Slide 17 · Percepatan Phase-1 <span class="badge phase1">Tahap-1</span></div>
+    <h1 class="slide-title">Percepatan Implementasi Tahap-1</h1>
+  </div>
+  <div class="slide-body">
+    <div class="grid-2-img">
+      <div style="display:flex;flex-direction:column;gap:var(--content-gap)">
+        <div class="img-zoom fade-up" style="flex:1"><img src="assets/Tahap1-Mobile_devices.jpeg" alt="Tahap-1 Mobile"><div class="img-cap">Mobile Devices Tahap-1</div></div>
+        <div class="img-zoom fade-up d2" style="flex:1"><img src="assets/Tahap1-VMTHHT.png" alt="VMT HHT Phase 1"><div class="img-cap">Samsung Xcover 7" Deployment</div></div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:var(--content-gap)">
+        <div class="stat-row fade-up d2">
+          <div class="stat"><div class="num">1 Aug</div><div class="lbl">2026 Target</div></div>
+        </div>
+        <div class="card fade-up d3"><h3>🚛 Heavy Equipment Tahap-1</h3><div class="stat-row"><div class="stat"><div class="num">2</div><div class="lbl">RTG</div></div><div class="stat"><div class="num">5</div><div class="lbl">Truck</div></div><div class="stat"><div class="num">1</div><div class="lbl">RS</div></div><div class="stat"><div class="num">1</div><div class="lbl">QC</div></div></div></div>
+        <div class="card fade-up d4"><h3>📱 Mobile Strategy</h3><p>Samsung Xcover 7" — <b style="color:var(--magenta)">9 unit per equipment</b>. Memanfaatkan public LTE/5G selama wireless infra belum siap. Fiber pulling paralel di bulan 1–2.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== SLIDE 18 — Percepatan Gate ============== -->
+<section class="slide" data-title="Percepatan Gate">
+  <div class="slide-header">
+    <div class="eyebrow">Slide 18 · Percepatan Gate <span class="badge phase1">Tahap-1</span></div>
+    <h1 class="slide-title">Percepatan Gate Infrastruktur</h1>
+  </div>
+  <div class="slide-body">
+    <div class="card fade-up" style="flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center">
+      <div class="stat-row" style="margin-bottom:1.5em"><div class="stat"><div class="num">4</div><div class="lbl">HHT Samsung Xcover 7"</div></div></div>
+      <h3 style="color:#fff;font-size:var(--h2-size);margin-bottom:.5em">Manual Transactions via HHT</h3>
+      <p style="font-size:var(--h3-size);color:var(--text-dim);max-width:60ch">Konektivitas <b style="color:var(--cyan)">LTE/5G public</b> langsung ke MY-TOS CLOUD selama autogate kiosk belum terpasang. Driver &amp; tally clerk dapat melakukan transaksi via aplikasi mobile native, dengan validasi data real-time melalui IoT SIM.</p>
+      <div class="flow fade-up d2" style="margin-top:1.2em;font-size:var(--body-size)"><span class="step">HHT</span><span class="arr">→</span><span class="step">LTE/5G</span><span class="arr">→</span><span class="step">VPN</span><span class="arr">→</span><span class="step">MY-TOS Cloud</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== SLIDE 19 — Percepatan Yard ============== -->
+<section class="slide" data-title="Percepatan Yard">
+  <div class="slide-header">
+    <div class="eyebrow">Slide 19 · Percepatan Yard <span class="badge phase1">Tahap-1</span></div>
+    <h1 class="slide-title">Percepatan Yard Infrastruktur</h1>
+  </div>
+  <div class="slide-body">
+    <div class="grid-2-img">
+      <div style="display:flex;flex-direction:column;gap:var(--content-gap)">
+        <div class="img-zoom fade-up" style="flex:1"><img src="assets/Tahap1-FIber.png" alt="Tahap1 Fiber"><div class="img-cap">Fiber Tahap-1</div></div>
+        <div class="img-zoom fade-up d2" style="flex:1"><img src="assets/Tahap1-AP.png" alt="Tahap1 AP"><div class="img-cap">AP Tahap-1</div></div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:var(--content-gap);justify-content:center">
+        <div class="card fade-up d2"><h3>🏗️ Mandatory Towers</h3><p>Persyaratan utama: <b style="color:var(--magenta)">tower di area Yard Phase-1</b> sudah berdiri sebelum fiber pulling untuk CCTV dimulai.</p></div>
+        <div class="card fade-up d3"><h3>🔌 Network Switch Strategy</h3><ul><li>Tower 7, 8, 9 — kandidat utama instalasi industrial switch Tahap-1</li><li>Memastikan distribusi ke perimeter berth &amp; QC apron</li><li>Mendukung CCTV deployment fase awal</li></ul></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== SLIDE 20 — Percepatan PNC ============== -->
+<section class="slide" data-title="Percepatan PNC">
+  <div class="slide-header">
+    <div class="eyebrow">Slide 20 · Percepatan PNC <span class="badge phase1">Tahap-1</span></div>
+    <h1 class="slide-title">Percepatan PNC Infrastruktur</h1>
+  </div>
+  <div class="slide-body">
+    <div class="grid-2-img">
+      <div class="img-zoom fade-up"><img src="assets/Tahap1-Switches.png" alt="Tahap1 Switches"><div class="img-cap">Distribusi Switch Tahap-1</div></div>
+      <div style="display:flex;flex-direction:column;gap:var(--content-gap);justify-content:center">
+        <div class="card fade-up d2"><h3>🔗 Dependency Eksisting</h3><p>Memerlukan <b style="color:var(--cyan)">fiber eksisting</b> dari PTP office ke Terminal-3 dan Terminal-2 sebagai backbone awal.</p></div>
+        <div class="card fade-up d3"><h3>🖥️ Local P&amp;C — Terminal-2 Office</h3><ul><li>Opsi penempatan Planner &amp; Officer di Terminal-2</li><li>2 Set <b style="color:var(--cyan)">PC + Monitor</b> untuk Planner &amp; Officer</li><li>Handy Talky untuk koordinasi operasional</li></ul></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== SLIDE 21 — Percepatan Data Center ============== -->
+<section class="slide" data-title="Percepatan DC">
+  <div class="slide-header">
+    <div class="eyebrow">Slide 21 · Percepatan Data Center <span class="badge phase1">Tahap-1</span></div>
+    <h1 class="slide-title">Percepatan Data Center</h1>
+  </div>
+  <div class="slide-body">
+    <div class="grid-2-img">
+      <div class="img-zoom fade-up"><img src="assets/Tahap1-CCTV.png" alt="Tahap1 CCTV"><div class="img-cap">Rack &amp; CCTV Layout Tahap-1</div></div>
+      <div style="display:flex;flex-direction:column;gap:var(--content-gap);justify-content:center">
+        <div class="card fade-up d2"><h3>🗄️ Network Rack Installation</h3><ul><li>Network Switch + Router + Firewall</li><li>Koneksi dual ISP</li><li>Workstation VMS Milestone</li></ul></div>
+        <div class="card fade-up d3"><h3>⚡ Mandatory Support</h3><div class="stat-row"><div class="stat"><div class="num">AC</div><div class="lbl">Air Conditioner</div></div><div class="stat"><div class="num">UPS</div><div class="lbl">Power Backup</div></div></div><p style="margin-top:.6em">Kondisi server room — temperature &amp; power redundancy adalah prasyarat operasional 24/7.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== SLIDE 22 — RACI MATRIX ============== -->
+<section class="slide" data-title="RACI Matrix">
+  <div class="slide-header">
+    <div class="eyebrow">Slide 22 · RACI Matrix <span class="badge phase1">Tahap-1</span></div>
+    <h1 class="slide-title">RACI Matriks Tahap-1</h1>
+    <div class="raci-legend"><span><b>R</b> Responsible</span><span><b>A</b> Accountable</span><span><b>C</b> Consulted</span><span><b>I</b> Informed</span></div>
+  </div>
+  <div class="slide-body">
+    <div class="card fade-up" style="flex:1;display:flex;flex-direction:column;min-height:0">
+      <div class="tbl-wrap" style="flex:1"><table class="tbl">
+        <thead><tr><th style="min-width:24ch">Deliverable / Scope</th><th style="text-align:center">GII</th><th style="text-align:center">SPTP</th><th>Catatan</th></tr></thead>
+        <tbody>
+          <tr><td>High mast tower setup</td><td class="ci">I</td><td class="ra">R / A</td><td>Civil contractor SPTP</td></tr>
+          <tr><td>HV / LV switchgear</td><td class="ci">I</td><td class="ra">R / A</td><td>Distribusi power utama</td></tr>
+          <tr><td>13 IoT SIM cards</td><td class="ci">C</td><td class="ra">R / A</td><td>Untuk VMT/HHT/GPS</td></tr>
+          <tr><td>Handy Talkie operators</td><td class="ci">C</td><td class="ra">R / A</td><td>Komunikasi operasional</td></tr>
+          <tr><td>Existing fiber PTP → T-3 / T-2</td><td class="ci">C</td><td class="ra">R / A</td><td>Backbone eksisting</td></tr>
+          <tr><td>Server room — Air Conditioner</td><td class="ci">I</td><td class="ra">R / A</td><td>Building facility</td></tr>
+          <tr><td>New fiber office ↔ yard &amp; office ↔ T-3</td><td class="ra">R / A</td><td class="ci">I</td><td>3,950m + HDPE</td></tr>
+          <tr><td>STP cable office → gate</td><td class="ra">R / A</td><td class="ci">I</td><td>Outdoor Cat 5e</td></tr>
+          <tr><td>VMT / HHT, Switches, CCTV, AP, Autogate</td><td class="ra">R / A</td><td class="ci">C</td><td>Full IT devices</td></tr>
+          <tr><td>Video Wall, Public Address, GPS Fleet</td><td class="ra">R / A</td><td class="ci">C</td><td>Optional packages</td></tr>
+          <tr><td>MY-TOS Cloud deployment</td><td class="ra">R / A</td><td class="ci">C</td><td>AWS dual-AZ</td></tr>
+          <tr><td>Operator training MY-TOS</td><td class="ra">R / A</td><td class="ci">C</td><td>End-user enablement</td></tr>
+          <tr><td>IT infrastructure knowledge transfer</td><td class="ra">R / A</td><td class="ci">C</td><td>Dokumentasi &amp; handover</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== SLIDE 23 — BOM Tahap-1 ============== -->
+<section class="slide" data-title="BOM Tahap-1">
+  <div class="slide-header">
+    <div class="eyebrow">Slide 23 · BOM Tahap-1 <span class="badge phase1">Tahap-1</span></div>
+    <h1 class="slide-title">Pemenuhan BOM Tahap-1</h1>
+  </div>
+  <div class="slide-body">
+    <div class="card fade-up" style="flex:1;display:flex;flex-direction:column;min-height:0">
+      <div class="tbl-wrap" style="flex:1"><table class="tbl">
+        <thead><tr><th>Kategori</th><th>Item</th><th>Qty Tahap-1</th><th style="opacity:.6">Full Deploy</th></tr></thead>
+        <tbody>
+          <tr><td rowspan="2"><b style="color:var(--magenta)">Mobile</b></td><td>VMT Samsung Xcover 7"</td><td>9</td><td style="opacity:.6">33</td></tr>
+          <tr><td>HHT Samsung Xcover 7"</td><td>4</td><td style="opacity:.6">10</td></tr>
+          <tr><td rowspan="3"><b style="color:var(--magenta)">CCTV</b></td><td>PTZ Camera CY</td><td>3</td><td style="opacity:.6">10</td></tr>
+          <tr><td>Fixed Camera CY</td><td>6</td><td style="opacity:.6">20</td></tr>
+          <tr><td>Fixed Camera Gate</td><td>18</td><td style="opacity:.6">18 (same)</td></tr>
+          <tr><td rowspan="2"><b style="color:var(--magenta)">Wireless</b></td><td>AP 802.11ax w/ bracket &amp; PoE</td><td>2</td><td style="opacity:.6">6</td></tr>
+          <tr><td>Wireless Controller</td><td>1</td><td style="opacity:.6">1 (same)</td></tr>
+          <tr><td><b style="color:var(--magenta)">Autogate</b></td><td>(Manual via HHT — no kiosk Tahap-1)</td><td>0</td><td style="opacity:.6">6 lanes</td></tr>
+          <tr><td rowspan="7"><b style="color:var(--magenta)">Network</b></td><td>Switch Cisco 24 Port SFP</td><td>1</td><td style="opacity:.6">1</td></tr>
+          <tr><td>Switch Cisco 24 Port</td><td>2</td><td style="opacity:.6">2</td></tr>
+          <tr><td>Industrial Switch 8 Port + SFP</td><td>3</td><td style="opacity:.6">16</td></tr>
+          <tr><td>UPS 3 KVA Rack</td><td>1</td><td style="opacity:.6">2</td></tr>
+          <tr><td>UPS 1 KVA</td><td>3</td><td style="opacity:.6">10</td></tr>
+          <tr><td>Rack Mount 20U</td><td>1</td><td style="opacity:.6">2</td></tr>
+          <tr><td>Patch Panel 24 Port</td><td>1</td><td style="opacity:.6">2</td></tr>
+          <tr><td><b style="color:var(--cyan)">Fiber</b></td><td>FO 48 Core + HDPE + termination</td><td colspan="2">Full 3,950m pulling Tahap-1</td></tr>
+          <tr><td><b style="color:var(--gold)">Optional</b></td><td>Video Wall · PA · GPS Fleet</td><td colspan="2" style="color:var(--text-dim)">Ditunda ke deployment lanjutan</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== SLIDE 24 — TIMELINE INFOGRAPHIC ============== -->
+<section class="slide" data-title="Timeline">
+  <div class="slide-header">
+    <div class="eyebrow">Slide 24 · Timeline · 6 Bulan menuju 1 Aug 2026 <span class="badge phase1">Tahap-1</span></div>
+    <h1 class="slide-title">Timeline Implementasi Tahap-1</h1>
+  </div>
+  <div class="slide-body">
+    <div class="timeline fade-up">
+      <div class="tl-step"><div class="tl-circle">M1</div><div class="tl-card"><h4>Kick-off</h4><ul><li>Material order &amp; delivery</li><li>Fiber + HDPE laying</li><li>MY-TOS Cloud deploy</li></ul></div></div>
+      <div class="tl-step"><div class="tl-circle">M2</div><div class="tl-card"><h4>Splice &amp; Power</h4><ul><li>Splicing + OTDR</li><li>ODC + FDU termination</li><li>UPS, VMT, CCTV, Rack</li><li>MY-TOS UAT</li></ul></div></div>
+      <div class="tl-step go-live"><div class="tl-circle">M3</div><div class="tl-card"><h4>★ GO-LIVE Phase-1</h4><ul><li>WAN Edge + FW + Core</li><li>VLAN segmentation</li><li>Dual ISP cutover</li><li><b style="color:var(--gold)">MY-TOS GO-LIVE</b></li></ul></div></div>
+      <div class="tl-step"><div class="tl-circle">M4</div><div class="tl-card"><h4>Tower &amp; Wireless</h4><ul><li>9 tower (AP + horn)</li><li>Remaining CCTV</li><li>Wireless tuning</li><li>9 UPS commissioning</li></ul></div></div>
+      <div class="tl-step"><div class="tl-circle">M5</div><div class="tl-card"><h4>Gate &amp; PNC</h4><ul><li>6-lane autogate kiosk</li><li>Video wall + console</li><li>SIP PBX + PA</li><li>VMT/HHT training</li></ul></div></div>
+      <div class="tl-step"><div class="tl-circle">M6</div><div class="tl-card"><h4>Handover</h4><ul><li>E2E integration test</li><li>UAT SPTP</li><li>Cutover + warranty</li><li>Documentation handover</li></ul></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== SLIDE 25 — Q&A / Thank You ============== -->
+<section class="slide cover" data-title="Thank You">
+  <div class="cover-glow a"></div>
+  <div class="cover-glow b"></div>
+  <div class="cover-logos closing">
+    <div class="logo-box"><img src="assets/logo-gii.svg" alt="PT Global Intelegensi Indonesia"></div>
+    <div class="logo-x">×</div>
+    <div class="logo-box"><img src="assets/logo-sptp.svg" alt="PT SPTP"></div>
+  </div>
+  <div class="eyebrow" style="text-align:center;display:block">Terima Kasih</div>
+  <h1 style="font-size:clamp(2.5rem,6vw,5rem)">Q &amp; A</h1>
+  <div class="tag">Diskusi lanjutan, sesi teknis, atau klarifikasi BOM dipersilakan — kami siap mendampingi PT SPTP menuju Go-Live <b style="color:var(--cyan)">1 Agustus 2026</b>.</div>
+  <div class="meta">
+    <span>PT Global Intelegensi Indonesia</span>
+    <span>IT Solution Designer</span>
+    <span>MY-TOS · Infrastructure · Support</span>
+  </div>
+</section>
+
+</div>
+
+<script>
+(function(){
+  const deck = document.getElementById('deck');
+  const slides = Array.from(deck.querySelectorAll('.slide'));
+  const fill = document.getElementById('progFill');
+  const cur = document.getElementById('curIdx');
+  const tot = document.getElementById('totIdx');
+  const prevBtn = document.getElementById('prevBtn');
+  const nextBtn = document.getElementById('nextBtn');
+  const N = slides.length;
+  tot.textContent = '/' + String(N).padStart(2,'0');
+
+  // Split titles into chars for staggered reveal
+  slides.forEach(s => {
+    const t = s.querySelector('.slide-title');
+    if(!t) return;
+    const text = t.textContent;
+    t.innerHTML = '';
+    let i = 0;
+    text.split('').forEach(ch => {
+      const span = document.createElement('span');
+      span.className = 'char';
+      span.style.transitionDelay = (i * 28) + 'ms';
+      span.textContent = ch === ' ' ? ' ' : ch;
+      t.appendChild(span);
+      i++;
+    });
+  });
+
+  let activeIdx = 0;
+  function setActive(i){
+    activeIdx = Math.max(0, Math.min(N - 1, i));
+    slides.forEach((s,k) => s.classList.toggle('is-active', k === activeIdx));
+    fill.style.width = ((activeIdx + 1) / N * 100) + '%';
+    cur.textContent = String(activeIdx + 1).padStart(2,'0');
+    prevBtn.classList.toggle('disabled', activeIdx === 0);
+    nextBtn.classList.toggle('disabled', activeIdx === N - 1);
+  }
+  function goTo(i){
+    activeIdx = Math.max(0, Math.min(N - 1, i));
+    slides[activeIdx].scrollIntoView({behavior:'smooth',inline:'start',block:'start'});
+    setActive(activeIdx);
+  }
+
+  // Observe scroll to update active
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if(e.isIntersecting && e.intersectionRatio > 0.55){
+        const idx = slides.indexOf(e.target);
+        if(idx >= 0) setActive(idx);
+      }
+    });
+  }, {root: deck, threshold:[0.55, 0.8]});
+  slides.forEach(s => io.observe(s));
+
+  // Keyboard
+  window.addEventListener('keydown', e => {
+    if(['ArrowRight','PageDown',' '].includes(e.key)){ e.preventDefault(); goTo(activeIdx + 1); }
+    else if(['ArrowLeft','PageUp'].includes(e.key)){ e.preventDefault(); goTo(activeIdx - 1); }
+    else if(e.key === 'Home'){ e.preventDefault(); goTo(0); }
+    else if(e.key === 'End'){ e.preventDefault(); goTo(N-1); }
+  });
+
+  // Buttons
+  prevBtn.addEventListener('click', () => goTo(activeIdx - 1));
+  nextBtn.addEventListener('click', () => goTo(activeIdx + 1));
+
+  // Wheel: vertical scroll → horizontal navigation
+  let wheelLock = false;
+  deck.addEventListener('wheel', e => {
+    if(wheelLock) return;
+    const dy = e.deltaY;
+    const dx = e.deltaX;
+    const d = Math.abs(dy) > Math.abs(dx) ? dy : dx;
+    if(Math.abs(d) < 12) return;
+    e.preventDefault();
+    wheelLock = true;
+    goTo(activeIdx + (d > 0 ? 1 : -1));
+    setTimeout(() => wheelLock = false, 520);
+  }, {passive:false});
+
+  // Touch swipe
+  let touchStartX = 0, touchStartY = 0, touching = false;
+  deck.addEventListener('touchstart', e => {
+    touching = true;
+    touchStartX = e.touches[0].clientX;
+    touchStartY = e.touches[0].clientY;
+  }, {passive:true});
+  deck.addEventListener('touchend', e => {
+    if(!touching) return; touching = false;
+    const dx = e.changedTouches[0].clientX - touchStartX;
+    const dy = e.changedTouches[0].clientY - touchStartY;
+    if(Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy)){
+      goTo(activeIdx + (dx < 0 ? 1 : -1));
+    }
+  });
+
+  // Mouse drag (for desktop testing)
+  let mouseDown = false, mouseStartX = 0;
+  deck.addEventListener('mousedown', e => { mouseDown = true; mouseStartX = e.clientX; });
+  window.addEventListener('mouseup', e => {
+    if(!mouseDown) return; mouseDown = false;
+    const dx = e.clientX - mouseStartX;
+    if(Math.abs(dx) > 100){ goTo(activeIdx + (dx < 0 ? 1 : -1)); }
+  });
+
+  setActive(0);
+
+  // ===== Image manual zoom controls + drag-to-pan =====
+  document.querySelectorAll('.img-zoom').forEach(z => {
+    const img = z.querySelector('img');
+    if(!img) return;
+    const ctrl = document.createElement('div');
+    ctrl.className = 'img-zoom-ctrl';
+    ctrl.innerHTML =
+      '<button data-act="out" title="Zoom out" aria-label="Zoom out">−</button>'+
+      '<div class="lvl" data-lvl>100%</div>'+
+      '<button data-act="in" title="Zoom in" aria-label="Zoom in">+</button>'+
+      '<button data-act="reset" title="Reset" aria-label="Reset">⟲</button>';
+    z.appendChild(ctrl);
+    const lvl = ctrl.querySelector('[data-lvl]');
+    let scale = 1, tx = 0, ty = 0;
+    function clampPan(){
+      // limit pan so image doesn't drift too far
+      const r = z.getBoundingClientRect();
+      const max = (scale - 1) * 0.5;
+      const mx = r.width * max;
+      const my = r.height * max;
+      tx = Math.max(-mx, Math.min(mx, tx));
+      ty = Math.max(-my, Math.min(my, ty));
+    }
+    function apply(){
+      clampPan();
+      z.style.setProperty('--zoom', scale);
+      z.style.setProperty('--tx', tx + 'px');
+      z.style.setProperty('--ty', ty + 'px');
+      z.classList.toggle('zoomed', scale !== 1);
+      lvl.textContent = Math.round(scale * 100) + '%';
+    }
+    ctrl.addEventListener('click', e => {
+      const a = e.target.dataset && e.target.dataset.act;
+      if(!a) return;
+      e.stopPropagation();
+      if(a === 'in') scale = Math.min(5, +(scale + 0.4).toFixed(2));
+      else if(a === 'out'){ scale = Math.max(1, +(scale - 0.4).toFixed(2)); if(scale === 1){ tx = ty = 0; } }
+      else { scale = 1; tx = 0; ty = 0; }
+      apply();
+    });
+    // prevent deck navigation when interacting inside img-zoom
+    ctrl.addEventListener('mousedown', e => e.stopPropagation());
+
+    // Drag-to-pan when zoomed
+    let dragging = false, sx = 0, sy = 0, stx = 0, sty = 0;
+    img.addEventListener('mousedown', e => {
+      if(scale === 1) return;
+      e.stopPropagation();
+      e.preventDefault();
+      dragging = true;
+      sx = e.clientX; sy = e.clientY;
+      stx = tx; sty = ty;
+      z.classList.add('grabbing');
+    });
+    window.addEventListener('mousemove', e => {
+      if(!dragging) return;
+      tx = stx + (e.clientX - sx);
+      ty = sty + (e.clientY - sy);
+      apply();
+    });
+    window.addEventListener('mouseup', () => {
+      if(dragging){ dragging = false; z.classList.remove('grabbing'); }
+    });
+
+    // Touch pan
+    let tDrag = false, tsx = 0, tsy = 0, ttx = 0, tty = 0;
+    img.addEventListener('touchstart', e => {
+      if(scale === 1 || e.touches.length !== 1) return;
+      tDrag = true;
+      tsx = e.touches[0].clientX; tsy = e.touches[0].clientY;
+      ttx = tx; tty = ty;
+    }, {passive:true});
+    img.addEventListener('touchmove', e => {
+      if(!tDrag) return;
+      e.preventDefault();
+      tx = ttx + (e.touches[0].clientX - tsx);
+      ty = tty + (e.touches[0].clientY - tsy);
+      apply();
+    }, {passive:false});
+    img.addEventListener('touchend', () => { tDrag = false; });
+
+    // Wheel zoom while hovering image (ctrl/cmd + wheel, or any wheel when already zoomed)
+    z.addEventListener('wheel', e => {
+      const useZoom = e.ctrlKey || e.metaKey || scale > 1;
+      if(!useZoom) return;
+      e.preventDefault();
+      e.stopPropagation();
+      const delta = e.deltaY > 0 ? -0.25 : 0.25;
+      scale = Math.max(1, Math.min(5, +(scale + delta).toFixed(2)));
+      if(scale === 1){ tx = ty = 0; }
+      apply();
+    }, {passive:false});
+
+    apply();
+  });
+})();
+</script>
+</body>
+</html>
